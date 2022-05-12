@@ -7,8 +7,8 @@ function App() {
         <h2 className="text-3xl mx-3 mt-4 mb-9 font-semibold text-gray-800">VideoLab</h2>
         <div className="flex-col justify-between flex-1 mt-6">
           <nav>
-            <a className="flex items-center px-4 py-2 mt-3 text-gray-700 bg-gray-200 duration-200 hover:bg-gray-300 rounded-md"
-              href="#">
+            <button className="flex items-center px-4 py-2 mt-3 text-gray-700 bg-gray-200 duration-200 hover:bg-gray-300 rounded-md"
+            >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                 className="side-icon">
                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -16,10 +16,10 @@ function App() {
                   fill="#0C0D0F"></path>
               </svg>
               <span className="mx-4 font-medium">TV</span>
-            </a>
+            </button>
 
-            <a className="flex items-center px-4 py-2 mt-3 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700"
-              href="#">
+            <button className="flex items-center px-4 py-2 mt-3 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700"
+            >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                 className="side-icon">
                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -27,10 +27,10 @@ function App() {
                   fill="#0C0D0F"></path>
               </svg>
               <span className="mx-4 font-medium">Game</span>
-            </a>
+            </button>
 
-            <a className="flex items-center px-4 py-2 mt-3 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700"
-              href="#">
+            <button className="flex items-center px-4 py-2 mt-3 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700"
+            >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                 className="side-icon">
                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -38,11 +38,11 @@ function App() {
                   fill="#0C0D0F"></path>
               </svg>
               <span className="mx-4 font-medium">Music</span>
-            </a>
+            </button>
 
 
-            <a className="flex items-center px-4 py-2 mt-3 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700"
-              href="#">
+            <button className="flex items-center px-4 py-2 mt-3 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700"
+            >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                 className="side-icon">
                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -50,14 +50,14 @@ function App() {
                   fill="#0C0D0F"></path>
               </svg>
               <span className="mx-4 font-medium">Movie</span>
-            </a>
+            </button>
           </nav>
         </div>
       </div>
       <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
         <div className="flex flex-wrap h-min gap-6">
           <div className="w-72 bg-white rounded-md shadow-md overflow-hidden duration-200 hover:scale-[102%]">
-            <a href="#">
+            <button>
               <div className="relative w-72 h-[10.125rem]">
                 <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(' + require('./img/test2.jpg') + ')' }}>
                 </div>
@@ -71,10 +71,10 @@ function App() {
                   映画『ゆるキャン△』2022年初夏、全国ロードショー</p>
                 <p className="mt-1 text-sm text-gray-500">01:11 · 7.4K views</p>
               </div>
-            </a>
+            </button>
           </div>
           <div className="w-72 bg-white rounded-md shadow-md overflow-hidden duration-200 hover:scale-[102%]">
-            <a href="#">
+            <button>
               <div className="relative w-72 h-[10.125rem]">
                 <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(' + require('./img/test.jpg') + ')' }}>
                 </div>
@@ -88,7 +88,7 @@ function App() {
                   Happy Lunar New Year! (2022 ver)</p>
                 <p className="mt-1 text-sm text-gray-500">02:22 · 9.4K views</p>
               </div>
-            </a>
+            </button>
           </div>
         </div>
       </div>
