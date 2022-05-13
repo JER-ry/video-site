@@ -26,7 +26,7 @@ function VideoPreview(props) {
         {props.title}
       </p>
       <p className="flex mt-1 text-sm text-gray-400">
-        {props.lengthStr} · {props.recommended ? 'Recommended for you' : props.viewCount + ' views'}
+        {props.lengthStr} · {props.recommended ? 'Recommended for you' : props.viewCount.toLocaleString('en-US') + ' views'}
       </p>
     </div>
   </button>);
@@ -63,6 +63,12 @@ function VideoList(props) {
   );
 }
 
+function Player(props) {
+  return <div className="w-full h-full justify-center bg-white rounded-md shadow-md overflow-hidden duration-200 text-gray-300 text-center">
+    <iframe className="w-full h-full" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>;
+}
+
 
 class App extends React.Component {
   constructor(props) {
@@ -78,6 +84,7 @@ class App extends React.Component {
       currentCategory: 0,
       videoList: fetchDefault(0),
       anythingToRecommend: true,
+      playing: false,
     }
   };
 
@@ -85,6 +92,7 @@ class App extends React.Component {
     this.setState({
       currentCategory: i,
       videoList: fetchDefault(i),
+      anythingToRecommend: true,
     })
   }
 
@@ -114,7 +122,7 @@ class App extends React.Component {
           </nav>
         </div>
         <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
-          <VideoList videoList={this.state.videoList} anythingToRecommend={this.state.anythingToRecommend} onRecClick={() => this.handleRecClick()}></VideoList>
+          {this.state.playing ? <Player id={null}></Player> : <VideoList videoList={this.state.videoList} anythingToRecommend={this.state.anythingToRecommend} onRecClick={() => this.handleRecClick()}></VideoList>}
         </div>
       </div >
     );
