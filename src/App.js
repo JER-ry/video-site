@@ -21,20 +21,44 @@ function VideoPreview(props) {
         Play
       </div>
     </div>
-    <div className="flex-col content-start grow-0 p-3">
+    <div className="flex-col h-18 content-start grow-0 p-3">
       <p className="truncate font-medium text-left text-base text-gray-700 duration-200 hover:text-gray-500">
-        {props.title}</p>
-      <p className="flex mt-1 text-sm text-gray-500">{props.lengthStr} · {props.recommended ? 'Recommended for you' : props.viewCount + ' views'}</p>
+        {props.title}
+      </p>
+      <p className="flex mt-1 text-sm text-gray-400">
+        {props.lengthStr} · {props.recommended ? 'Recommended for you' : props.viewCount + ' views'}
+      </p>
     </div>
   </button>);
+}
+
+function RecommendMore(props) {
+  const recommendable = (<button className="w-72 h-[14.625rem] bg-white rounded-md shadow-md overflow-hidden duration-200 text-gray-400 hover:text-gray-500 hover:scale-[102%]" onClick={props.onClick}>
+    <p className="font-extrabold text-7xl mb-4">
+      …
+    </p>
+    <p className="font-medium text-xl mb-4">
+      Show more videos recommended for you
+    </p>
+  </button >)
+  const nothingToRecommend = (<div className="flex flex-col justify-center w-72 h-[14.625rem] bg-white rounded-md shadow-md overflow-hidden duration-200 text-gray-300 text-center">
+    <p className="font-extrabold text-7xl mb-4">
+      :(
+    </p>
+    <p className="font-medium text-xl mb-4">
+      There's nothing more to recommend now
+    </p>
+  </div>)
+  return props.anythingToRecommend ? recommendable : nothingToRecommend;
 }
 
 function VideoList(props) {
   return (
     <div className="flex flex-wrap h-min gap-6">
-      {props.listForThisCategory.map((item, i) =>
+      {props.videoList.map((item, i) =>
         <VideoPreview title={item.title} cover={item.cover} lengthStr={item.lengthStr} viewCount={item.viewCount} recommended={item.recommended}></VideoPreview>
       )}
+      <RecommendMore anythingToRecommend={props.anythingToRecommend} onClick={props.onRecClick}></RecommendMore>
     </div>
   );
 }
@@ -52,33 +76,30 @@ class App extends React.Component {
         icon: <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="side-icon"> <path fill-rule="evenodd" clip-rule="evenodd" d="M2.625 10a7.375 7.375 0 1 1 13.796 3.63.75.75 0 0 0 1.305.74A8.843 8.843 0 0 0 18.875 10a8.875 8.875 0 1 0-4.707 7.837c.577-.307 1.192-.313 1.621-.039l1.308.834a.75.75 0 0 0 .806-1.264l-1.307-.834c-1-.639-2.213-.51-3.133-.02A7.375 7.375 0 0 1 2.625 10ZM8.75 6.75a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0Zm0 6.5a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 0 0-2.5 0Zm-2-2a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5Zm6.5 0a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5Z" fill="#0C0D0F"></path></svg>
       }],
       currentCategory: 0,
-      videoList: [
-        [
-          {
-            title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
-            cover: require('./img/test2.jpg'),
-            lengthStr: "01:11",
-            viewCount: 7423,
-            recommended: true,
-          },
-        ],
-        [
-          {
-            title: "Happy New Year 2022",
-            cover: require('./img/test.jpg'),
-            lengthStr: "02:24",
-            viewCount: 4543,
-            recommended: false,
-          },
-        ]
-      ]
+      videoList: fetchDefault(0),
+      anythingToRecommend: true,
     }
   };
 
   handleNavClick(i) {
     this.setState({
-      currentCategory: i
+      currentCategory: i,
+      videoList: fetchDefault(i),
     })
+  }
+
+  handleRecClick() {
+    const fetchRecommend = recommendMore(this.state.currentCategory);
+    const videoList = this.state.videoList.slice();
+    if (fetchRecommend) {
+      this.setState({
+        videoList: videoList.concat(fetchRecommend),
+      })
+    } else {
+      this.setState({
+        anythingToRecommend: false,
+      })
+    };
   }
 
   render() {
@@ -93,12 +114,93 @@ class App extends React.Component {
           </nav>
         </div>
         <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
-          <VideoList listForThisCategory={this.state.videoList[this.state.currentCategory]}></VideoList>
+          <VideoList videoList={this.state.videoList} anythingToRecommend={this.state.anythingToRecommend} onRecClick={() => this.handleRecClick()}></VideoList>
         </div>
-      </div>
+      </div >
     );
   }
 }
 
+var defaultVideoList = [
+  [
+    {
+      id: {},
+      title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
+      cover: require('./img/test2.jpg'),
+      lengthStr: "01:11",
+      viewCount: 7423,
+      recommended: false,
+    },
+    {
+      id: {},
+      title: "Happy New Year 2022",
+      cover: require('./img/test.jpg'),
+      lengthStr: "02:24",
+      viewCount: 4543,
+      recommended: false,
+    },
+  ],
+  [
+    {
+      id: {},
+      title: "I forgot it",
+      cover: require('./img/test3.jpg'),
+      lengthStr: "00:06",
+      viewCount: 18,
+      recommended: false,
+    },
+    {
+      id: {},
+      title: "Something?",
+      cover: require('./img/test4.jpg'),
+      lengthStr: "92:01",
+      viewCount: 12003,
+      recommended: false,
+    },
+  ]
+];
+
+var videoToRecommend = [
+  {
+    id: {},
+    title: "Rubbish bin",
+    cover: require('./img/test5.jpg'),
+    lengthStr: "03:46",
+    viewCount: 3719,
+    recommended: true,
+  },
+  {
+    id: {},
+    title: "CSSAUG cares you",
+    cover: require('./img/test6.jpg'),
+    lengthStr: "05:20",
+    viewCount: 521,
+    recommended: true,
+  },
+  {
+    id: {},
+    title: "A photo, where there are mountains, lakes and plants, but not sun yet",
+    cover: require('./img/test7.jpg'),
+    lengthStr: "01:11",
+    viewCount: 7423,
+    recommended: true,
+  },
+]
+
+function fetchDefault(currentCategory) {
+  // Update defaultVideoList here.
+  return defaultVideoList[currentCategory];
+}
+
+function recommendMore(currentCategory) {
+  try {
+    // Update videoToRecommend here
+    return videoToRecommend.length === 0 ? null : videoToRecommend;
+  } finally {
+    // Just to show the situation when there is nothing more to recommend.
+    // try/finally and the line below should be deleted later on.
+    videoToRecommend = [];
+  }
+}
 
 export default App;
