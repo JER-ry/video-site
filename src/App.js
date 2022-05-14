@@ -16,7 +16,7 @@ class User extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      status: 1, // 0 - login, 1 - register, 2 - logged in
+      status: 0, // 0 - login, 1 - register, 2 - logged in
     }
   }
 
