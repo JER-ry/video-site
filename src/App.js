@@ -66,7 +66,7 @@ class VideoList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      videoList: defaultVideoList,
+      videoList: videoList,
       anythingToRecommend: true,
       playing: false,
       videoToPlay: null,
@@ -74,11 +74,9 @@ class VideoList extends React.Component {
   }
 
   handleRecClick() {
-    const fetchRecommend = recommendMore();
-    const videoList = this.state.videoList.slice();
-    if (fetchRecommend) {
+    if (recommendMore()) {
       this.setState({
-        videoList: videoList.concat(fetchRecommend),
+        videoList: videoList,
       })
     } else {
       this.setState({
@@ -166,6 +164,7 @@ class Player extends React.Component {
 class App extends React.Component {
   constructor(props) {
     super(props);
+    // Update videoList here
     this.state = {
       tabList: [
         {
@@ -206,7 +205,7 @@ class App extends React.Component {
   }
 }
 
-var defaultVideoList = [
+var videoList = [
   {
     id: {},
     title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
@@ -277,13 +276,13 @@ var videoToRecommend = [
 ]
 
 function recommendMore() {
-  try {
-    // Update videoToRecommend here
-    return videoToRecommend.length === 0 ? null : videoToRecommend;
-  } finally {
-    // Just to show the situation when there is nothing more to recommend.
-    // try/finally and the line below should be deleted later on.
+  // Update videoToRecommend here
+  if (videoToRecommend.length === 0)
+    return false;
+  else {
+    videoList = videoList.concat(videoToRecommend);
     videoToRecommend = [];
+    return true
   }
 }
 
