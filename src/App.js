@@ -20,7 +20,7 @@ function User(props) {
 }
 
 function VideoPreview(props) {
-  return (<button className="w-72 bg-white rounded-md shadow-md overflow-hidden duration-200 hover:scale-[102%]">
+  return (<button className="w-72 bg-white rounded-md shadow-md overflow-hidden duration-200 hover:scale-[102%]" onClick={props.onClick}>
     <div className="relative w-72 h-[10.125rem]">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(' + props.video.cover + ')' }}>
       </div>
@@ -36,7 +36,7 @@ function VideoPreview(props) {
         </p>
       </p>
       <p className="flex mt-1 text-sm text-gray-400">
-        {props.video.lengthStr}{props.video.recommended ? ' · Recommended for you' : ""}
+        {props.video.lengthStr} · {props.video.category}{props.video.recommended ? ' · For you' : ""}
       </p>
     </div>
   </button>);
@@ -56,28 +56,86 @@ function RecommendMore(props) {
       :(
     </p>
     <p className="font-medium text-xl mb-4">
-      There's nothing more to recommend now
+      There's nothing more to recommend for now
     </p>
   </div>)
   return props.anythingToRecommend ? recommendable : nothingToRecommend;
 }
 
-function VideoList(props) {
-  return (
-    <div className="flex flex-wrap h-min gap-6">
-      {props.videoList.map((item, i) =>
-        <VideoPreview video={item}></VideoPreview>
-      )}
-      <RecommendMore anythingToRecommend={props.anythingToRecommend} onClick={props.onRecClick}></RecommendMore>
-    </div>
-  );
+class VideoList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      videoList: defaultVideoList,
+      anythingToRecommend: true,
+      playing: false,
+      videoToPlay: null,
+    }
+  }
+
+  handleRecClick() {
+    const fetchRecommend = recommendMore();
+    const videoList = this.state.videoList.slice();
+    if (fetchRecommend) {
+      this.setState({
+        videoList: videoList.concat(fetchRecommend),
+      })
+    } else {
+      this.setState({
+        anythingToRecommend: false,
+      })
+    };
+  }
+
+  handleVideoClick(i) {
+    this.setState({
+      playing: true,
+      videoToPlay: i,
+    })
+  }
+
+  handleBackClick() {
+    this.setState({
+      playing: false,
+      videoToPlay: null,
+    })
+  }
+
+  handleLike() {
+    // Upload to server
+    const videoList = this.state.videoList.slice();
+    videoList[this.state.videoToPlay].liked = true;
+    this.setState({
+      videoList: videoList,
+    })
+  }
+
+  handleUnlike() {
+    // Upload to server
+    const videoList = this.state.videoList.slice();
+    videoList[this.state.videoToPlay].liked = false;
+    this.setState({
+      videoList: videoList,
+    })
+  }
+
+  render() {
+    return (
+      this.state.playing ? <Player videoToPlay={this.state.videoList[this.state.videoToPlay]} handleBackClick={() => this.handleBackClick()} handleLike={() => this.handleLike()} handleUnlike={() => this.handleUnlike()}></Player> :
+        (<div className="flex flex-wrap h-min gap-6">
+          {this.state.videoList.map((item, i) =>
+            <VideoPreview video={item} onClick={() => this.handleVideoClick(i)}></VideoPreview>
+          )}
+          <RecommendMore anythingToRecommend={this.state.anythingToRecommend} onClick={() => this.handleRecClick()}></RecommendMore>
+        </div>)
+    );
+  }
 }
 
 class Player extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      liked: false,
     }
   }
 
@@ -88,15 +146,19 @@ class Player extends React.Component {
           <iframe className="w-full" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
         <div className="inline-flex place-content-between items-center font-medium text-base w-[90%] h-[10%] bg-white rounded-md overflow-hidden shadow-md">
-          <button className="flex w-36 h-full justify-center items-center text-gray-400 duration-200 hover:text-gray-500 hover:bg-gray-200">&lt; Back</button>
-          <div className="flex truncate h-full justify-center items-center text-center">
-            <p className="min-w-0 truncate">映画『ゆるキャン△』2022年初夏、全国ロードショー2333333
+          <button className="flex w-36 h-full justify-center items-center text-gray-400 duration-200 hover:text-gray-500 hover:bg-gray-200" onClick={this.props.handleBackClick}>&lt; Back</button>
+          <div className="flex flex-col truncate h-full justify-center items-center text-center">
+            <p className="min-w-0 truncate">
+              {this.props.videoToPlay.title}
+            </p>
+            <p className="min-w-0 truncate text-sm text-gray-400">
+              {this.props.videoToPlay.lengthStr} · {this.props.videoToPlay.category}{this.props.videoToPlay.recommended ? ' · For you' : ""}
             </p>
           </div>
-          <button className="flex w-36 h-full justify-center items-center text-gray-400 duration-200 hover:text-gray-500 hover:bg-gray-200">👍 Like</button>
+          {this.props.videoToPlay.liked ? <button className="flex w-36 h-full justify-center items-center text-gray-500 duration-200 hover:text-gray-500 hover:bg-gray-200" onClick={() => this.props.handleUnlike()}>👍 Liked</button> : <button className="flex w-36 h-full justify-center items-center text-gray-400 duration-200 hover:text-gray-500 hover:bg-gray-200" onClick={() => this.props.handleLike()}>👍 Like</button>}
         </div>
       </div>
-    ); // {this.props.title}
+    );
   }
 }
 
@@ -116,36 +178,13 @@ class App extends React.Component {
         }
       ],
       currentTab: 1,
-      videoList: fetchDefault(0),
-      anythingToRecommend: true,
-      playing: false,
     }
   };
 
   handleNavClick(i) {
     this.setState({
       currentTab: i,
-      videoList: fetchDefault(i),
-      anythingToRecommend: true,
     })
-  }
-
-  handleRecClick() {
-    const fetchRecommend = recommendMore();
-    const videoList = this.state.videoList.slice();
-    if (fetchRecommend) {
-      this.setState({
-        videoList: videoList.concat(fetchRecommend),
-      })
-    } else {
-      this.setState({
-        anythingToRecommend: false,
-      })
-    };
-  }
-
-  handleVideoClick() {
-
   }
 
   render() {
@@ -160,7 +199,7 @@ class App extends React.Component {
           </nav>
         </div>
         <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
-          {this.state.currentTab === 0 ? <User></User> : (this.state.playing ? <Player id={null}></Player> : <VideoList videoList={this.state.videoList} anythingToRecommend={this.state.anythingToRecommend} onRecClick={() => this.handleRecClick()}></VideoList>)}
+          {this.state.currentTab === 0 ? <User></User> : <VideoList></VideoList>}
         </div>
       </div>
     );
@@ -173,6 +212,8 @@ var defaultVideoList = [
     title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
     cover: require('./img/test2.jpg'),
     lengthStr: "01:11",
+    category: 'Movie',
+    liked: false,
     recommended: false,
   },
   {
@@ -180,6 +221,8 @@ var defaultVideoList = [
     title: "Happy New Year 2022",
     cover: require('./img/test.jpg'),
     lengthStr: "02:24",
+    category: 'Advertisement',
+    liked: false,
     recommended: false,
   },
   {
@@ -188,6 +231,8 @@ var defaultVideoList = [
     cover: require('./img/test3.jpg'),
     lengthStr: "00:06",
     viewCount: 18,
+    category: 'Short',
+    liked: false,
     recommended: false,
   },
   {
@@ -195,6 +240,8 @@ var defaultVideoList = [
     title: "Something?",
     cover: require('./img/test4.jpg'),
     lengthStr: "92:01",
+    category: 'Short',
+    liked: false,
     recommended: false,
   },
 ];
@@ -205,6 +252,8 @@ var videoToRecommend = [
     title: "Rubbish bin",
     cover: require('./img/test5.jpg'),
     lengthStr: "03:46",
+    category: 'Rubbish',
+    liked: false,
     recommended: true,
   },
   {
@@ -212,6 +261,8 @@ var videoToRecommend = [
     title: "CSSAUG cares you",
     cover: require('./img/test6.jpg'),
     lengthStr: "05:20",
+    category: 'Rubbish',
+    liked: false,
     recommended: true,
   },
   {
@@ -219,14 +270,11 @@ var videoToRecommend = [
     title: "A photo, where there are mountains, lakes and plants, but not sun yet",
     cover: require('./img/test7.jpg'),
     lengthStr: "01:11",
+    category: 'Nature',
+    liked: false,
     recommended: true,
   },
 ]
-
-function fetchDefault() {
-  // Update defaultVideoList here.
-  return defaultVideoList;
-}
 
 function recommendMore() {
   try {
