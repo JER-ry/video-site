@@ -16,8 +16,15 @@ class User extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      status: 0, // 0 - login, 1 - register, 2 - logged in
+      status: this.props.userId ? 2 : 0, // 0 - login, 1 - register, 2 - logged in
     }
+  }
+
+  handleLogin(id) {
+    this.setState({
+      status: 2,
+    })
+    this.props.updateUserId(1000);
   }
 
   handleRegister() {
@@ -26,95 +33,89 @@ class User extends React.Component {
     })
   }
 
+  handleRegisterSubmit(id) {
+    this.setState({
+      status: 2,
+    })
+    // Get the ID from the server
+    this.props.updateUserId(1000);
+  }
+
+
   render() {
     if (this.state.status === 0)
-      return (
-        <div className="flex w-full h-full items-center justify-center">
-          <div className="overflow-hidden bg-white rounded-lg shadow-md">
-            <div className="px-10 pt-10 pb-8 space-y-6">
-              <h2 className="text-2xl font-bold text-left text-gray-700">Welcome to VideoLab</h2>
-              <form className="flex justify-between">
-                <input className="w-[65%] px-4 py-3 text-gray-700 placeholder-gray-400 bg-white border rounded-md duration-200 focus:border-gray-300 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none" type="ID" placeholder="User ID" aria-label="ID" />
-                <button className="w-[30%] px-4 py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none" type="button">Login</button>
-              </form>
-            </div>
-            <div className="items-center justify-center py-4 text-center bg-gray-50">
-              <button className="mx-1 text-sm font-bold duration-200 text-gray-400 hover:text-gray-500" onClick={() => this.handleRegister()}>Register here</button><span className="text-sm text-gray-400">if you don't have an account.</span>
-            </div>
-          </div>
-        </div>
-      );
+      return <Login handleLogin={(id) => this.handleLogin(id)} handleRegister={() => this.handleRegister()}></Login>;
     else if (this.state.status === 1)
-      return (
-        <div className="flex w-full h-full items-center justify-center">
-          <div className="p-10 space-y-6 overflow-hidden bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-left text-gray-700">Choose 3 categories of your interest</h2>
-            <form className="flex flex-col gap-8">
-              <div class="flex flex-wrap h-min gap-6">
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="1" id="1" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="1">
-                    Short
-                  </label>
-                </div>
+      return <Register handleRegisterSubmit={(id) => this.handleRegisterSubmit(id)}></Register>;
+    else
+      return <div className="flex w-full h-full items-center justify-center">
+        <h2 className="overflow-hidden bg-white rounded-lg shadow-md px-10 py-10 text-2xl font-bold text-left text-gray-700">
+          ✅ You've logged in.
+        </h2>
+      </div>;
+  }
+}
 
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="2" id="2" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="2">
-                    Movie
-                  </label>
-                </div>
+class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
 
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="3" id="3" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="3">
-                    Seems normal
-                  </label>
-                </div>
+    }
+  }
+  render() {
+    return (<div className="flex w-full h-full items-center justify-center">
+      <div className="overflow-hidden bg-white rounded-lg shadow-md">
+        <div className="px-10 pt-10 pb-8 space-y-6">
+          <h2 className="text-2xl font-bold text-left text-gray-700">Welcome to VideoLab</h2>
+          <form className="flex justify-between">
+            <input className="w-[65%] px-4 py-3 text-gray-700 placeholder-gray-400 bg-white border rounded-md duration-200 focus:border-gray-300 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none" type="ID" placeholder="User ID" aria-label="ID" />
+            <button className="w-[30%] px-4 py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none" type="button" onClick={(id) => this.props.handleLogin(id)}>Login</button>
+          </form>
+        </div>
+        <div className="items-center justify-center py-4 text-center bg-gray-50">
+          <button className="mx-1 text-sm font-bold duration-200 text-gray-400 hover:text-gray-500" onClick={() => this.props.handleRegister()}>Register here</button><span className="text-sm text-gray-400">if you don't have an account.</span>
+        </div>
+      </div>
+    </div>);
+  }
+}
 
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="4" id="4" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="4">
-                    Rubbish
-                  </label>
-                </div>
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="5" id="5" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="5">
-                    Idk
-                  </label>
-                </div>
+class Register extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+    }
+  }
 
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="6" id="6" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="6">
-                    Sci-fi
-                  </label>
-                </div>
+  render() {
+    return <div className="flex w-full h-full items-center justify-center">
+      <div className="max-w-lg p-10 space-y-6 overflow-hidden bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-left text-gray-700">Choose 3 categories of your interest</h2>
+        <form className="flex flex-col gap-8">
 
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="7" id="7" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="7">
-                    Music
-                  </label>
-                </div>
+          <div class="flex flex-wrap h-min gap-6">
+            <div class="relative">
+              <input class="hidden group peer" type="checkbox" name="interstedCategories" value="cat1" id="cat1" />
+              <label class="block px-4 py-3 border rounded-lg cursor-pointer duration-200 text-gray-700 peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:bg-gray-50 peer-checked:ring peer-checked:ring-gray-300" for="cat1">
+                cat1
+              </label>
+            </div>
 
-                <div class="relative">
-                  <input class="hidden group peer" type="checkbox" name="interstedCategories" value="8" id="8" />
-                  <label class="block p-4 text-sm font-medium transition-colors border border-gray-100 rounded-lg shadow-sm cursor-pointer peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:ring-1 peer-checked:ring-gray-500" for="8">
-                    Anime
-                  </label>
-                </div>
-              </div>
-
-              <button className="py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none" type="button">Submit</button>
-            </form>
+            <div class="relative">
+              <input class="hidden group peer" type="checkbox" name="interstedCategories" value="cat2" id="cat2" />
+              <label class="block px-4 py-3 border rounded-lg cursor-pointer duration-200 text-gray-700 peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:bg-gray-50 peer-checked:ring peer-checked:ring-gray-300" for="cat2">
+                cat2
+              </label>
+            </div>
 
           </div>
-        </div>
-      );
-    else
-      return {};
+
+          <button className="py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none" type="button" onClick={(id) => this.props.handleRegisterSubmit(id)}>Submit</button>
+        </form>
+
+      </div>
+    </div>;
   }
 }
 
@@ -209,7 +210,7 @@ class VideoList extends React.Component {
 
   handleLike() {
     // Upload to server
-    const videoList = this.state.videoList.slice();
+    var videoList = this.state.videoList.slice();
     videoList[this.state.videoToPlay].liked = true;
     this.setState({
       videoList: videoList,
@@ -218,7 +219,7 @@ class VideoList extends React.Component {
 
   handleUnlike() {
     // Upload to server
-    const videoList = this.state.videoList.slice();
+    var videoList = this.state.videoList.slice();
     videoList[this.state.videoToPlay].liked = false;
     this.setState({
       videoList: videoList,
@@ -278,18 +279,28 @@ class App extends React.Component {
           name: "User",
           icon: <svg width="18" height="18" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" p-id="1250"><path d="M512 74.666667C270.933333 74.666667 74.666667 270.933333 74.666667 512S270.933333 949.333333 512 949.333333 949.333333 753.066667 949.333333 512 753.066667 74.666667 512 74.666667zM288 810.666667c0-123.733333 100.266667-224 224-224S736 686.933333 736 810.666667c-61.866667 46.933333-140.8 74.666667-224 74.666666s-162.133333-27.733333-224-74.666666z m128-384c0-53.333333 42.666667-96 96-96s96 42.666667 96 96-42.666667 96-96 96-96-42.666667-96-96z m377.6 328.533333c-19.2-96-85.333333-174.933333-174.933333-211.2 32-29.866667 51.2-70.4 51.2-117.333333 0-87.466667-72.533333-160-160-160s-160 72.533333-160 160c0 46.933333 19.2 87.466667 51.2 117.333333-89.6 36.266667-155.733333 115.2-174.933334 211.2-55.466667-66.133333-91.733333-149.333333-91.733333-243.2 0-204.8 168.533333-373.333333 373.333333-373.333333S885.333333 307.2 885.333333 512c0 93.866667-34.133333 177.066667-91.733333 243.2z" p-id="1251"></path></svg>,
         },
-        {
-          name: "Videos",
-          icon: <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.53.47a.75.75 0 0 1 0 1.06l-2.72 2.72H17c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 17 18.25H3a1.75 1.75 0 0 1-1.75-1.75V6c0-.966.784-1.75 1.75-1.75h4.894L5.85 2.581a.75.75 0 0 1 .948-1.162L9.95 3.99l3.52-3.52a.75.75 0 0 1 1.061 0ZM9.997 5.75H17a.25.25 0 0 1 .25.25v10.5a.25.25 0 0 1-.25.25H3a.25.25 0 0 1-.25-.25V6A.25.25 0 0 1 3 5.75h6.997ZM7.5 13.25a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Z" fill="#0C0D0F"></path></svg>,
-        }
       ],
       currentTab: 0,
+      userId: null,
     }
   };
 
   handleNavClick(i) {
     this.setState({
       currentTab: i,
+    })
+  }
+
+  updateUserId(id) {
+    const tabList = this.state.tabList.slice();
+    tabList[0].name = "ID: " + id;
+    tabList.push({
+      name: "Videos",
+      icon: <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.53.47a.75.75 0 0 1 0 1.06l-2.72 2.72H17c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 17 18.25H3a1.75 1.75 0 0 1-1.75-1.75V6c0-.966.784-1.75 1.75-1.75h4.894L5.85 2.581a.75.75 0 0 1 .948-1.162L9.95 3.99l3.52-3.52a.75.75 0 0 1 1.061 0ZM9.997 5.75H17a.25.25 0 0 1 .25.25v10.5a.25.25 0 0 1-.25.25H3a.25.25 0 0 1-.25-.25V6A.25.25 0 0 1 3 5.75h6.997ZM7.5 13.25a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Z" fill="#0C0D0F"></path></svg>,
+    });
+    this.setState({
+      userId: id,
+      tabList: tabList,
     })
   }
 
@@ -305,7 +316,7 @@ class App extends React.Component {
           </nav>
         </div>
         <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
-          {this.state.currentTab === 0 ? <User></User> : <VideoList></VideoList>}
+          {this.state.currentTab === 0 ? <User userId={this.state.userId} updateUserId={(id) => this.updateUserId(id)}></User> : <VideoList></VideoList>}
         </div>
       </div>
     );
@@ -365,7 +376,7 @@ var sim = [
       lengthStr: "92:01",
       category: 'Short',
       liked: false,
-      recommended: false,
+      recommended: true,
     }, {
       id: {},
       title: "Rubbish bin",
