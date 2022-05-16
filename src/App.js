@@ -1,6 +1,5 @@
 import React, { Component } from "react"
-import { Formik, Form, Field } from "formik"
-// import * as Yup from "yup"
+import { Formik, Form, Field, ErrorMessage } from "formik"
 import "./App.css"
 
 function Tab(props) {
@@ -27,11 +26,11 @@ class User extends Component {
     }
   }
 
-  handleLogin(id) {
+  handleLogin(values) {
     this.setState({
       status: 2
     })
-    this.props.updateUserId(1000)
+    this.props.updateUserId(values.userId)
   }
 
   handleRegister() {
@@ -40,34 +39,38 @@ class User extends Component {
     })
   }
 
-  handleRegisterSubmit(id) {
+  handleRegisterSubmit(values) {
     this.setState({
       status: 2
     })
-    // Get the ID from the server
-    this.props.updateUserId(1000)
+    this.props.updateUserId(registerNewUserId(values.interstedCategories))
   }
 
   render() {
     if (this.state.status === 0) {
       return (
         <Login
-          handleLogin={(id) => this.handleLogin(id)}
+          handleLogin={(userId) => this.handleLogin(userId)}
           handleRegister={() => this.handleRegister()}
         />
       )
     } else if (this.state.status === 1) {
       return (
         <Register
-          handleRegisterSubmit={(id) => this.handleRegisterSubmit(id)}
+          handleRegisterSubmit={(userId) => this.handleRegisterSubmit(userId)}
         />
       )
     } else {
       return (
         <div className="flex w-full h-full items-center justify-center">
-          <h2 className="overflow-hidden bg-white rounded-lg shadow-md px-10 py-10 text-2xl font-bold text-left text-gray-700">
-            ✅ You&apos;ve logged in.
-          </h2>
+          <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-md px-10 py-10 text-left gap-2">
+            <h2 className="flex text-2xl font-bold text-gray-700">
+              ✅ Your user ID: {this.props.userId}
+            </h2>
+            <p className="flex text-base text-gray-400">
+              Go to the Videos tab and watch something.
+            </p>
+          </div>
         </div>
       )
     }
@@ -88,28 +91,44 @@ class Login extends Component {
             <h2 className="text-2xl font-bold text-left text-gray-700">
               Welcome to VideoLab
             </h2>
-            <Formik initialValues={{ id: "" }}>
-              <Form className="flex justify-between">
-                <Field
-                  className="w-[65%] px-4 py-3 text-gray-700 placeholder-gray-400 bg-white border rounded-md duration-200 focus:border-gray-300 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
-                  id="id"
-                  name="id"
-                  placeholder="User ID"
+            <Formik
+              initialValues={{ userId: "" }}
+              validate={(values) => {
+                const errors = {}
+                if (!values.userId) errors.userId = "Enter your user ID."
+                else if (!checkUserId(values.userId))
+                  errors.userId = "This ID doesn't exist."
+                return errors
+              }}
+              onSubmit={(userId) => this.props.handleLogin(userId)}
+            >
+              <Form>
+                <div className="flex justify-between">
+                  <Field
+                    className="w-[65%] px-4 py-3 text-gray-700 placeholder-gray-400 bg-white border rounded-md duration-200 focus:border-gray-300 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
+                    id="userId"
+                    name="userId"
+                    placeholder="User ID"
+                  />
+                  <button
+                    className="w-[30%] px-4 py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
+                    type="submit"
+                  >
+                    Login
+                  </button>
+                </div>
+                <ErrorMessage
+                  name="userId"
+                  component="div"
+                  className="mt-4 text-red-500 text-sm"
                 />
-                <button
-                  className="w-[30%] px-4 py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
-                  type="submit"
-                  onClick={(id) => this.props.handleLogin(id)}
-                >
-                  Login
-                </button>
               </Form>
             </Formik>
           </div>
           <div className="items-center justify-center py-4 text-center bg-gray-50">
             <button
               className="mx-1 text-sm font-bold duration-200 text-gray-400 hover:text-gray-500"
-              onClick={() => this.props.handleRegister()}
+              onClick={(values) => this.props.handleRegister(values)}
             >
               Register here
             </button>
@@ -138,36 +157,54 @@ class Register extends Component {
           <h2 className="text-2xl font-bold text-left text-gray-700">
             Choose 3 categories of your interest
           </h2>
-          <Formik initialValues={{ interstedCategories: [] }}>
-            <Form className="flex flex-col gap-8">
-              <div className="flex flex-wrap h-min gap-6">
-                {this.state.catList.map((item, i) => (
-                  <div key={i}>
-                    <Field
-                      className="hidden peer"
-                      type="checkbox"
-                      name="interstedCategories"
-                      value={item}
-                      id={i}
-                    />
-                    <label
-                      className="block px-4 py-3 border rounded-lg cursor-pointer duration-200 text-gray-700 peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:bg-gray-50 peer-checked:ring peer-checked:ring-gray-300"
-                      htmlFor={i}
-                    >
-                      {item}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              <button
-                className="py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
-                type="submit"
-                onClick={(id) => this.props.handleRegisterSubmit(id)}
-              >
-                Submit
-              </button>
-            </Form>
-          </Formik>
+          <div className="flex flex-col gap-8">
+            <Formik
+              initialValues={{ interstedCategories: [] }}
+              onSubmit={(values) => this.props.handleRegisterSubmit(values)}
+              validate={(values) => {
+                const errors =
+                  values.interstedCategories.length === 3
+                    ? {}
+                    : {
+                        interstedCategories: "Choose exactly 3 categories."
+                      }
+                return errors
+              }}
+            >
+              <Form className="flex flex-col gap-6">
+                <div className="flex flex-wrap h-min gap-6">
+                  {this.state.catList.map((item, i) => (
+                    <div key={i}>
+                      <Field
+                        className="hidden peer"
+                        type="checkbox"
+                        name="interstedCategories"
+                        value={item}
+                        id={i}
+                      />
+                      <label
+                        className="block px-4 py-3 border rounded-lg cursor-pointer duration-200 text-gray-700 peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:bg-gray-50 peer-checked:ring peer-checked:ring-gray-300"
+                        htmlFor={i}
+                      >
+                        {item}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <ErrorMessage
+                  name="interstedCategories"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
+                <button
+                  className="py-3 text-center text-white duration-200 bg-gray-700 rounded hover:bg-gray-600 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
+                  type="submit"
+                >
+                  Submit
+                </button>
+              </Form>
+            </Formik>{" "}
+          </div>
         </div>
       </div>
     )
@@ -238,7 +275,7 @@ class VideoList extends Component {
 
   componentDidMount() {
     if (videoList.length === 0) {
-      recommendMore()
+      recommendMore(this.props.userId)
       this.setState({
         videoList
       })
@@ -246,7 +283,7 @@ class VideoList extends Component {
   }
 
   handleRecClick() {
-    if (recommendMore()) {
+    if (recommendMore(this.props.userId)) {
       this.setState({
         videoList
       })
@@ -404,9 +441,9 @@ class App extends Component {
     })
   }
 
-  updateUserId(id) {
+  updateUserId(userId) {
     const tabList = this.state.tabList.slice()
-    tabList[0].name = "ID: " + id
+    tabList[0].name = "Logged in"
     tabList.push({
       name: "Videos",
       icon: (
@@ -427,7 +464,7 @@ class App extends Component {
       )
     })
     this.setState({
-      userId: id,
+      userId: userId,
       tabList
     })
   }
@@ -455,10 +492,10 @@ class App extends Component {
           {this.state.currentTab === 0 ? (
             <User
               userId={this.state.userId}
-              updateUserId={(id) => this.updateUserId(id)}
+              updateUserId={(userId) => this.updateUserId(userId)}
             />
           ) : (
-            <VideoList />
+            <VideoList userId={this.state.userId} />
           )}
         </div>
       </div>
@@ -468,7 +505,7 @@ class App extends Component {
 
 let videoList = []
 
-function recommendMore() {
+function recommendMore(userId) {
   const videoToRecommend = recommendMoreUpdate() // For demonstration purposes only
   if (videoToRecommend.length === 0) {
     return false
@@ -483,7 +520,7 @@ let t = -1
 const sim = [
   [
     {
-      id: {},
+      videoId: {},
       title: "Happy New Year 2022",
       cover: require("./img/test.jpg"),
       lengthStr: "02:24",
@@ -492,7 +529,7 @@ const sim = [
       recommended: false
     },
     {
-      id: {},
+      videoId: {},
       title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
       cover: require("./img/test2.jpg"),
       lengthStr: "01:11",
@@ -501,7 +538,7 @@ const sim = [
       recommended: false
     },
     {
-      id: {},
+      videoId: {},
       title: "I forgot it",
       cover: require("./img/test3.jpg"),
       lengthStr: "00:06",
@@ -513,7 +550,7 @@ const sim = [
   ],
   [
     {
-      id: {},
+      videoId: {},
       title: "Something?",
       cover: require("./img/test4.jpg"),
       lengthStr: "92:01",
@@ -522,7 +559,7 @@ const sim = [
       recommended: true
     },
     {
-      id: {},
+      videoId: {},
       title: "Rubbish bin",
       cover: require("./img/test5.jpg"),
       lengthStr: "03:46",
@@ -533,7 +570,7 @@ const sim = [
   ],
   [
     {
-      id: {},
+      videoId: {},
       title: "CSSAUG cares you",
       cover: require("./img/test6.jpg"),
       lengthStr: "05:20",
@@ -542,7 +579,7 @@ const sim = [
       recommended: true
     },
     {
-      id: {},
+      videoId: {},
       title:
         "A photo, where there are mountains, lakes and plants, but not sun yet",
       cover: require("./img/test7.jpg"),
@@ -557,6 +594,14 @@ const sim = [
 function recommendMoreUpdate() {
   t += 1
   return t < sim.length ? sim[t] : []
+}
+
+function checkUserId(userId) {
+  return userId === "1000"
+}
+
+function registerNewUserId(interstedCategories) {
+  return "1000"
 }
 /* -------------Above: For demonstration purposes only------------- */
 
