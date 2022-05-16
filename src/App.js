@@ -22,7 +22,7 @@ class User extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      status: 0 // this.props.userId ? 2 : 0, // 0 - login, 1 - register, 2 - logged in
+      status: this.props.userId ? 2 : 0, // 0 - login, 1 - register, 2 - logged in
     }
   }
 
