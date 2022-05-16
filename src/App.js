@@ -1,6 +1,6 @@
 import React, { Component } from "react"
-import { Formik, Form, Field, ErrorMessage } from "formik"
-import * as Yup from "yup"
+import { Formik, Form, Field } from "formik"
+// import * as Yup from "yup"
 import "./App.css"
 
 function Tab(props) {
@@ -88,9 +88,9 @@ class Login extends Component {
             <h2 className="text-2xl font-bold text-left text-gray-700">
               Welcome to VideoLab
             </h2>
-            <Formik>
+            <Formik initialValues={{ id: "" }}>
               <Form className="flex justify-between">
-                <input
+                <Field
                   className="w-[65%] px-4 py-3 text-gray-700 placeholder-gray-400 bg-white border rounded-md duration-200 focus:border-gray-300 focus:ring-opacity-40 focus:ring focus:ring-gray-300 focus:outline-none"
                   id="id"
                   name="id"
@@ -138,20 +138,25 @@ class Register extends Component {
           <h2 className="text-2xl font-bold text-left text-gray-700">
             Choose 3 categories of your interest
           </h2>
-          <Formik>
+          <Formik initialValues={{ interstedCategories: [] }}>
             <Form className="flex flex-col gap-8">
-              <div role="group" className="flex flex-wrap h-min gap-6">
+              <div className="flex flex-wrap h-min gap-6">
                 {this.state.catList.map((item, i) => (
-                  <label className="block px-4 py-3 border rounded-lg cursor-pointer duration-200 text-gray-700 checked:border-gray-500 hover:bg-gray-50 checked:bg-gray-50 checked:ring checked:ring-gray-300">
-                    {" "}
-                    <input
-                      className="hidden"
+                  <div key={i}>
+                    <Field
+                      className="hidden peer"
                       type="checkbox"
                       name="interstedCategories"
                       value={item}
+                      id={i}
                     />
-                    {item}
-                  </label>
+                    <label
+                      className="block px-4 py-3 border rounded-lg cursor-pointer duration-200 text-gray-700 peer-checked:border-gray-500 hover:bg-gray-50 peer-checked:bg-gray-50 peer-checked:ring peer-checked:ring-gray-300"
+                      htmlFor={i}
+                    >
+                      {item}
+                    </label>
+                  </div>
                 ))}
               </div>
               <button
