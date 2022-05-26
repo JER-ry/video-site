@@ -2,6 +2,146 @@ import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage } from "formik"
 import "./App.css"
 
+class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      tabList: [
+        {
+          name: "User",
+          icon: (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 1024 1024"
+              xmlns="http://www.w3.org/2000/svg"
+              p-id="1250"
+            >
+              <path
+                d="M512 74.666667C270.933333 74.666667 74.666667 270.933333 74.666667 512S270.933333 949.333333 512 949.333333 949.333333 753.066667 949.333333 512 753.066667 74.666667 512 74.666667zM288 810.666667c0-123.733333 100.266667-224 224-224S736 686.933333 736 810.666667c-61.866667 46.933333-140.8 74.666667-224 74.666666s-162.133333-27.733333-224-74.666666z m128-384c0-53.333333 42.666667-96 96-96s96 42.666667 96 96-42.666667 96-96 96-96-42.666667-96-96z m377.6 328.533333c-19.2-96-85.333333-174.933333-174.933333-211.2 32-29.866667 51.2-70.4 51.2-117.333333 0-87.466667-72.533333-160-160-160s-160 72.533333-160 160c0 46.933333 19.2 87.466667 51.2 117.333333-89.6 36.266667-155.733333 115.2-174.933334 211.2-55.466667-66.133333-91.733333-149.333333-91.733333-243.2 0-204.8 168.533333-373.333333 373.333333-373.333333S885.333333 307.2 885.333333 512c0 93.866667-34.133333 177.066667-91.733333 243.2z"
+                p-id="1251"
+              />
+            </svg>
+          )
+        }
+      ],
+      currentTab: 0,
+      userId: null,
+      videoList: []
+    }
+  }
+
+  handleNavClick(i) {
+    this.setState({
+      currentTab: i
+    })
+  }
+
+  updateUserId(userId) {
+    const tabList = this.state.tabList.slice()
+    tabList[0].name = "Logged in"
+    tabList.push({
+      name: "Videos",
+      icon: (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M14.53.47a.75.75 0 0 1 0 1.06l-2.72 2.72H17c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 17 18.25H3a1.75 1.75 0 0 1-1.75-1.75V6c0-.966.784-1.75 1.75-1.75h4.894L5.85 2.581a.75.75 0 0 1 .948-1.162L9.95 3.99l3.52-3.52a.75.75 0 0 1 1.061 0ZM9.997 5.75H17a.25.25 0 0 1 .25.25v10.5a.25.25 0 0 1-.25.25H3a.25.25 0 0 1-.25-.25V6A.25.25 0 0 1 3 5.75h6.997ZM7.5 13.25a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Z"
+            fill="#0C0D0F"
+          />
+        </svg>
+      )
+    })
+    this.setState({
+      userId: userId,
+      tabList
+    })
+  }
+
+  recommendMore() {
+    const videoToRecommend = recommendMoreUpdate(this.props.userId) // For demonstration purposes only
+    if (videoToRecommend.length === 0) {
+      return false
+    } else {
+      const videoList = this.state.videoList.slice().concat(videoToRecommend)
+      this.setState({
+        videoList
+      })
+      return true
+    }
+  }
+
+  handleWatch(videoToPlay) {
+    // Upload to server
+  }
+
+  handleLike(videoToPlay) {
+    // Upload to server
+    const videoList = this.state.videoList.slice()
+    videoList[videoToPlay].liked = true
+    this.setState({
+      videoList
+    })
+  }
+
+  handleUnlike(videoToPlay) {
+    // Upload to server
+    const videoList = this.state.videoList.slice()
+    videoList[videoToPlay].liked = false
+    this.setState({
+      videoList
+    })
+  }
+
+  render() {
+    return (
+      <div className="flex h-screen">
+        <div className="flex flex-col w-72 px-8 py-8 bg-white border-r">
+          <h2 className="text-3xl mx-3 mt-4 mb-9 font-semibold text-gray-800">
+            VideoLab
+          </h2>
+          <nav className="flex flex-col content-start flex-1 mt-6">
+            {this.state.tabList.map((item, i) => (
+              <Tab
+                key={i}
+                name={item.name}
+                selected={this.state.currentTab === i}
+                onClick={() => this.handleNavClick(i)}
+                icon={item.icon}
+              />
+            ))}
+          </nav>
+        </div>
+        <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
+          {this.state.currentTab === 0 ? (
+            <User
+              userId={this.state.userId}
+              updateUserId={(userId) => this.updateUserId(userId)}
+              recommendMore={() => this.recommendMore()}
+            />
+          ) : (
+            <VideoList
+              userId={this.state.userId}
+              videoList={this.state.videoList}
+              recommendMore={() => this.recommendMore()}
+              handleWatch={(videoToPlay) => this.handleWatch(videoToPlay)}
+              handleLike={(videoToPlay) => this.handleLike(videoToPlay)}
+              handleUnlike={(videoToPlay) => this.handleUnlike(videoToPlay)}
+            />
+          )}
+        </div>
+      </div>
+    )
+  }
+}
+
 function Tab(props) {
   return (
     <button
@@ -22,7 +162,7 @@ class User extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      status: this.props.userId ? 2 : 0, // 0 - login, 1 - register, 2 - logged in
+      status: this.props.userId ? 2 : 0 // 0 - login, 1 - register, 2 - logged in
     }
   }
 
@@ -31,6 +171,7 @@ class User extends Component {
       status: 2
     })
     this.props.updateUserId(values.userId)
+    this.props.recommendMore()
   }
 
   handleRegister() {
@@ -44,6 +185,7 @@ class User extends Component {
       status: 2
     })
     this.props.updateUserId(registerNewUserId(values.interstedCategories))
+    this.props.recommendMore()
   }
 
   render() {
@@ -211,6 +353,66 @@ class Register extends Component {
   }
 }
 
+class VideoList extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      anythingToRecommend: true,
+      playing: false,
+      videoToPlay: null
+    }
+  }
+
+  handleRecClick() {
+    if (this.props.recommendMore()) {
+    } else {
+      this.setState({
+        anythingToRecommend: false
+      })
+    }
+  }
+
+  handleVideoClick(i) {
+    this.setState({
+      playing: true,
+      videoToPlay: i
+    })
+    this.props.handleWatch(this.state.videoToPlay)
+  }
+
+  handleBackClick() {
+    this.setState({
+      playing: false,
+      videoToPlay: null
+    })
+  }
+
+  render() {
+    return this.state.playing ? (
+      <Player
+        videoToPlay={this.state.videoList[this.state.videoToPlay]}
+        handleBackClick={() => this.handleBackClick()}
+        handleLike={() => this.props.handleLike(this.state.videoToPlay)}
+        handleUnlike={() => this.props.handleUnlike(this.state.videoToPlay)}
+      />
+    ) : (
+      <div className="flex flex-wrap h-min gap-6">
+        {this.props.videoList.map((item, i) => (
+          <VideoPreview
+            key={i}
+            video={item}
+            onClick={() => this.handleVideoClick(i)}
+          />
+        ))}
+        <RecommendMore
+          anythingToRecommend={this.state.anythingToRecommend}
+          onClick={() => this.handleRecClick()}
+        />
+      </div>
+    )
+  }
+}
+
 function VideoPreview(props) {
   return (
     <button
@@ -260,96 +462,6 @@ function RecommendMore(props) {
     </div>
   )
   return props.anythingToRecommend ? recommendable : nothingToRecommend
-}
-
-class VideoList extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      videoList,
-      anythingToRecommend: true,
-      playing: false,
-      videoToPlay: null
-    }
-  }
-
-  componentDidMount() {
-    if (videoList.length === 0) {
-      recommendMore(this.props.userId)
-      this.setState({
-        videoList
-      })
-    }
-  }
-
-  handleRecClick() {
-    if (recommendMore(this.props.userId)) {
-      this.setState({
-        videoList
-      })
-    } else {
-      this.setState({
-        anythingToRecommend: false
-      })
-    }
-  }
-
-  handleVideoClick(i) {
-    this.setState({
-      playing: true,
-      videoToPlay: i
-    })
-  }
-
-  handleBackClick() {
-    this.setState({
-      playing: false,
-      videoToPlay: null
-    })
-  }
-
-  handleLike() {
-    // Upload to server
-    const videoList = this.state.videoList.slice()
-    videoList[this.state.videoToPlay].liked = true
-    this.setState({
-      videoList
-    })
-  }
-
-  handleUnlike() {
-    // Upload to server
-    const videoList = this.state.videoList.slice()
-    videoList[this.state.videoToPlay].liked = false
-    this.setState({
-      videoList
-    })
-  }
-
-  render() {
-    return this.state.playing ? (
-      <Player
-        videoToPlay={this.state.videoList[this.state.videoToPlay]}
-        handleBackClick={() => this.handleBackClick()}
-        handleLike={() => this.handleLike()}
-        handleUnlike={() => this.handleUnlike()}
-      />
-    ) : (
-      <div className="flex flex-wrap h-min gap-6">
-        {this.state.videoList.map((item, i) => (
-          <VideoPreview
-            key={i}
-            video={item}
-            onClick={() => this.handleVideoClick(i)}
-          />
-        ))}
-        <RecommendMore
-          anythingToRecommend={this.state.anythingToRecommend}
-          onClick={() => this.handleRecClick()}
-        />
-      </div>
-    )
-  }
 }
 
 class Player extends Component {
@@ -407,115 +519,9 @@ class Player extends Component {
   }
 }
 
-class App extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      tabList: [
-        {
-          name: "User",
-          icon: (
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 1024 1024"
-              xmlns="http://www.w3.org/2000/svg"
-              p-id="1250"
-            >
-              <path
-                d="M512 74.666667C270.933333 74.666667 74.666667 270.933333 74.666667 512S270.933333 949.333333 512 949.333333 949.333333 753.066667 949.333333 512 753.066667 74.666667 512 74.666667zM288 810.666667c0-123.733333 100.266667-224 224-224S736 686.933333 736 810.666667c-61.866667 46.933333-140.8 74.666667-224 74.666666s-162.133333-27.733333-224-74.666666z m128-384c0-53.333333 42.666667-96 96-96s96 42.666667 96 96-42.666667 96-96 96-96-42.666667-96-96z m377.6 328.533333c-19.2-96-85.333333-174.933333-174.933333-211.2 32-29.866667 51.2-70.4 51.2-117.333333 0-87.466667-72.533333-160-160-160s-160 72.533333-160 160c0 46.933333 19.2 87.466667 51.2 117.333333-89.6 36.266667-155.733333 115.2-174.933334 211.2-55.466667-66.133333-91.733333-149.333333-91.733333-243.2 0-204.8 168.533333-373.333333 373.333333-373.333333S885.333333 307.2 885.333333 512c0 93.866667-34.133333 177.066667-91.733333 243.2z"
-                p-id="1251"
-              />
-            </svg>
-          )
-        }
-      ],
-      currentTab: 0,
-      userId: null
-    }
-  }
-
-  handleNavClick(i) {
-    this.setState({
-      currentTab: i
-    })
-  }
-
-  updateUserId(userId) {
-    const tabList = this.state.tabList.slice()
-    tabList[0].name = "Logged in"
-    tabList.push({
-      name: "Videos",
-      icon: (
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M14.53.47a.75.75 0 0 1 0 1.06l-2.72 2.72H17c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 17 18.25H3a1.75 1.75 0 0 1-1.75-1.75V6c0-.966.784-1.75 1.75-1.75h4.894L5.85 2.581a.75.75 0 0 1 .948-1.162L9.95 3.99l3.52-3.52a.75.75 0 0 1 1.061 0ZM9.997 5.75H17a.25.25 0 0 1 .25.25v10.5a.25.25 0 0 1-.25.25H3a.25.25 0 0 1-.25-.25V6A.25.25 0 0 1 3 5.75h6.997ZM7.5 13.25a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Z"
-            fill="#0C0D0F"
-          />
-        </svg>
-      )
-    })
-    this.setState({
-      userId: userId,
-      tabList
-    })
-  }
-
-  render() {
-    return (
-      <div className="flex h-screen">
-        <div className="flex flex-col w-72 px-8 py-8 bg-white border-r">
-          <h2 className="text-3xl mx-3 mt-4 mb-9 font-semibold text-gray-800">
-            VideoLab
-          </h2>
-          <nav className="flex flex-col content-start flex-1 mt-6">
-            {this.state.tabList.map((item, i) => (
-              <Tab
-                key={i}
-                name={item.name}
-                selected={this.state.currentTab === i}
-                onClick={() => this.handleNavClick(i)}
-                icon={item.icon}
-              />
-            ))}
-          </nav>
-        </div>
-        <div className="flex w-full px-6 py-8 bg-gray-100 overflow-y-scroll">
-          {this.state.currentTab === 0 ? (
-            <User
-              userId={this.state.userId}
-              updateUserId={(userId) => this.updateUserId(userId)}
-            />
-          ) : (
-            <VideoList userId={this.state.userId} />
-          )}
-        </div>
-      </div>
-    )
-  }
-}
-
-let videoList = []
-
-function recommendMore(userId) {
-  const videoToRecommend = recommendMoreUpdate() // For demonstration purposes only
-  if (videoToRecommend.length === 0) {
-    return false
-  } else {
-    videoList = videoList.concat(videoToRecommend)
-    return true
-  }
-}
-
 /* -------------Below: For demonstration purposes only------------- */
+// Good news: all the functions below are only called once.
+
 let t = -1
 const sim = [
   [
@@ -523,6 +529,7 @@ const sim = [
       videoId: {},
       title: "Happy New Year 2022",
       cover: require("./img/test.jpg"),
+      url: "",
       lengthStr: "02:24",
       category: "Advertisement",
       liked: false,
@@ -532,6 +539,7 @@ const sim = [
       videoId: {},
       title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
       cover: require("./img/test2.jpg"),
+      url: "",
       lengthStr: "01:11",
       category: "Movie",
       liked: false,
@@ -541,6 +549,7 @@ const sim = [
       videoId: {},
       title: "I forgot it",
       cover: require("./img/test3.jpg"),
+      url: "",
       lengthStr: "00:06",
       viewCount: 18,
       category: "Short",
@@ -553,6 +562,7 @@ const sim = [
       videoId: {},
       title: "Something?",
       cover: require("./img/test4.jpg"),
+      url: "",
       lengthStr: "92:01",
       category: "Short",
       liked: false,
@@ -562,6 +572,7 @@ const sim = [
       videoId: {},
       title: "Rubbish bin",
       cover: require("./img/test5.jpg"),
+      url: "",
       lengthStr: "03:46",
       category: "Rubbish",
       liked: false,
@@ -573,6 +584,7 @@ const sim = [
       videoId: {},
       title: "CSSAUG cares you",
       cover: require("./img/test6.jpg"),
+      url: "",
       lengthStr: "05:20",
       category: "Rubbish",
       liked: false,
@@ -583,6 +595,7 @@ const sim = [
       title:
         "A photo, where there are mountains, lakes and plants, but not sun yet",
       cover: require("./img/test7.jpg"),
+      url: "",
       lengthStr: "01:11",
       category: "Nature",
       liked: false,
@@ -591,8 +604,9 @@ const sim = [
   ]
 ]
 
-function recommendMoreUpdate() {
+function recommendMoreUpdate(userId) {
   t += 1
+  console.log(t)
   return t < sim.length ? sim[t] : []
 }
 
