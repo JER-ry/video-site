@@ -18,6 +18,6 @@ You also know how to deploy this to Netlify or so right?
 
 I mainly worked in a single file, `src/App.js`.
 
-The app hasn't been able to communicate with the server through APIs now. I wrote some fake functions for demonstration purposes (`recommendMoreUpdate()`, `checkUserId()`, `registerNewUserId()`), but it's not hard to change them into real ones that work. You'll also need to complete `handleWatch()`, `handleLike()` and `handleUnlike()` in the `App` class.
+The app has been designed to be able to communicate with the server through APIs now but still needs debugging.
 
 Also you need to integrate a video player that turns fetched `videoToPlay.url` into playing videos. Currently a YouTube embed player lies in the `Player` class.

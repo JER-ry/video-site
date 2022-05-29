@@ -2,13 +2,15 @@ import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage } from "formik"
 import "./App.css"
 
+const server = "http://127.0.0.1:8000/"
+
 class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
       tabList: [
         {
-          name: "User",
+          name: "Log in",
           icon: (
             <svg
               width="18"
@@ -65,25 +67,70 @@ class App extends Component {
     })
   }
 
+  handleRegisterSubmit(values) {
+    fetch(server + "register/", {
+      mode: "POST",
+      body: values
+    })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          this.updateUserId(result)
+        },
+        (error) => {}
+      )
+  }
+
   recommendMore() {
-    const videoToRecommend = recommendMoreUpdate(this.props.userId) // For demonstration purposes only
-    if (videoToRecommend.length === 0) {
-      return false
-    } else {
-      const videoList = this.state.videoList.slice().concat(videoToRecommend)
-      this.setState({
-        videoList
-      })
-      return true
-    }
+    fetch(server + "recommend_more/" + String(this.state.userId), {
+      method: "GET"
+    })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          if (result.length === 0) {
+            return false
+          } else {
+            this.setState({
+              videoList: this.state.videoList.slice().concat(result)
+            })
+            return true
+          }
+        },
+        (error) => {}
+      )
   }
 
   handleWatch(videoToPlay) {
-    // Upload to server
+    fetch(
+      server +
+        "watch/" +
+        String(this.props.userId) +
+        "/" +
+        String(videoToPlay.video_id),
+      { mode: "PUT" }
+    )
+      .then((res) => res.json())
+      .then(
+        (result) => {},
+        (error) => {}
+      )
   }
 
   handleLike(videoToPlay) {
-    // Upload to server
+    fetch(
+      server +
+        "watch/" +
+        String(this.props.userId) +
+        "/" +
+        String(videoToPlay.video_id),
+      { mode: "PUT" }
+    )
+      .then((res) => res.json())
+      .then(
+        (result) => {},
+        (error) => {}
+      )
     const videoList = this.state.videoList.slice()
     videoList[videoToPlay].liked = true
     this.setState({
@@ -92,7 +139,19 @@ class App extends Component {
   }
 
   handleUnlike(videoToPlay) {
-    // Upload to server
+    fetch(
+      server +
+        "watch/" +
+        String(this.props.userId) +
+        "/" +
+        String(videoToPlay.video_id),
+      { mode: "PUT" }
+    )
+      .then((res) => res.json())
+      .then(
+        (result) => {},
+        (error) => {}
+      )
     const videoList = this.state.videoList.slice()
     videoList[videoToPlay].liked = false
     this.setState({
@@ -130,6 +189,9 @@ class App extends Component {
             <VideoList
               userId={this.state.userId}
               videoList={this.state.videoList}
+              handleRegisterSubmit={(values) =>
+                this.handleRegisterSubmit(values)
+              }
               recommendMore={() => this.recommendMore()}
               handleWatch={(videoToPlay) => this.handleWatch(videoToPlay)}
               handleLike={(videoToPlay) => this.handleLike(videoToPlay)}
@@ -181,10 +243,10 @@ class User extends Component {
   }
 
   handleRegisterSubmit(values) {
+    this.props.handleRegisterSubmit(values)
     this.setState({
       status: 2
     })
-    this.props.updateUserId(registerNewUserId(values.interstedCategories))
     this.props.recommendMore()
   }
 
@@ -210,7 +272,8 @@ class User extends Component {
               ✅ Your user ID: {this.props.userId}
             </h2>
             <p className="flex text-base text-gray-400">
-              Go to the Videos tab and watch something.
+              Please save your user ID for the next login.<br></br>Go to the
+              Videos tab and watch something.
             </p>
           </div>
         </div>
@@ -222,7 +285,22 @@ class User extends Component {
 class Login extends Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    this.state = {
+      userIdExists: true
+    }
+  }
+
+  checkUserId(userId) {
+    fetch(server + "check_user_existence/" + String(userId), { method: "GET" })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            userIdExists: result
+          })
+        },
+        (error) => {}
+      )
   }
 
   render() {
@@ -238,8 +316,11 @@ class Login extends Component {
               validate={(values) => {
                 const errors = {}
                 if (!values.userId) errors.userId = "Enter your user ID."
-                else if (!checkUserId(values.userId))
-                  errors.userId = "This ID doesn't exist."
+                else {
+                  this.checkUserId(values.userId)
+                  if (!this.state.userIdExists)
+                    errors.userId = "This user ID doesn't exist."
+                }
                 return errors
               }}
               onSubmit={(userId) => this.props.handleLogin(userId)}
@@ -301,14 +382,14 @@ class Register extends Component {
           </h2>
           <div className="flex flex-col gap-8">
             <Formik
-              initialValues={{ interstedCategories: [] }}
+              initialValues={{ interested_categories: [] }}
               onSubmit={(values) => this.props.handleRegisterSubmit(values)}
               validate={(values) => {
                 const errors =
-                  values.interstedCategories.length === 3
+                  values.interested_categories.length === 3
                     ? {}
                     : {
-                        interstedCategories: "Choose exactly 3 categories."
+                        interested_categories: "Choose exactly 3 categories."
                       }
                 return errors
               }}
@@ -320,7 +401,7 @@ class Register extends Component {
                       <Field
                         className="hidden peer"
                         type="checkbox"
-                        name="interstedCategories"
+                        name="interested_categories"
                         value={item}
                         id={i}
                       />
@@ -334,7 +415,7 @@ class Register extends Component {
                   ))}
                 </div>
                 <ErrorMessage
-                  name="interstedCategories"
+                  name="interested_categories"
                   component="div"
                   className="text-red-500 text-sm"
                 />
@@ -433,7 +514,7 @@ function VideoPreview(props) {
           <p className="min-w-0 truncate">{props.video.title}</p>
         </p>
         <p className="flex mt-1 text-sm text-gray-400">
-          {props.video.lengthStr} · {props.video.category}
+          {props.video.length_str} · {props.video.category}
           {props.video.recommended ? " · For you" : ""}
         </p>
       </div>
@@ -475,13 +556,13 @@ class Player extends Component {
       <div className="flex flex-col w-full h-full items-center gap-6">
         <div className="flex w-[90%] h-[90%] bg-white rounded-md shadow-md overflow-hidden text-gray-300 text-center">
           <iframe
-            className="w-full"
-            src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+            title={this.props.videoToPlay.title}
+            src={this.props.videoToPlay.url}
+            frameborder="0"
+            width="100%"
+            height="100%"
+            allowfullscreen
+          ></iframe>
         </div>
         <div className="inline-flex place-content-between items-center font-medium text-base w-[90%] h-[10%] bg-white rounded-md overflow-hidden shadow-md">
           <button
@@ -493,7 +574,7 @@ class Player extends Component {
           <div className="flex flex-col truncate h-full justify-center items-center text-center">
             <p className="min-w-0 truncate">{this.props.videoToPlay.title}</p>
             <p className="min-w-0 truncate text-sm text-gray-400">
-              {this.props.videoToPlay.lengthStr} ·{" "}
+              {this.props.videoToPlay.length_str} ·{" "}
               {this.props.videoToPlay.category}
               {this.props.videoToPlay.recommended ? " · For you" : ""}
             </p>
@@ -518,105 +599,5 @@ class Player extends Component {
     )
   }
 }
-
-/* -------------Below: For demonstration purposes only------------- */
-// Good news: all the functions below are only called once.
-
-let t = -1
-const sim = [
-  [
-    {
-      videoId: {},
-      title: "Happy New Year 2022",
-      cover: require("./img/test.jpg"),
-      url: "",
-      lengthStr: "02:24",
-      category: "Advertisement",
-      liked: false,
-      recommended: false
-    },
-    {
-      videoId: {},
-      title: "映画『ゆるキャン△』2022年初夏、全国ロードショー",
-      cover: require("./img/test2.jpg"),
-      url: "",
-      lengthStr: "01:11",
-      category: "Movie",
-      liked: false,
-      recommended: false
-    },
-    {
-      videoId: {},
-      title: "I forgot it",
-      cover: require("./img/test3.jpg"),
-      url: "",
-      lengthStr: "00:06",
-      viewCount: 18,
-      category: "Short",
-      liked: false,
-      recommended: false
-    }
-  ],
-  [
-    {
-      videoId: {},
-      title: "Something?",
-      cover: require("./img/test4.jpg"),
-      url: "",
-      lengthStr: "92:01",
-      category: "Short",
-      liked: false,
-      recommended: true
-    },
-    {
-      videoId: {},
-      title: "Rubbish bin",
-      cover: require("./img/test5.jpg"),
-      url: "",
-      lengthStr: "03:46",
-      category: "Rubbish",
-      liked: false,
-      recommended: true
-    }
-  ],
-  [
-    {
-      videoId: {},
-      title: "CSSAUG cares you",
-      cover: require("./img/test6.jpg"),
-      url: "",
-      lengthStr: "05:20",
-      category: "Rubbish",
-      liked: false,
-      recommended: true
-    },
-    {
-      videoId: {},
-      title:
-        "A photo, where there are mountains, lakes and plants, but not sun yet",
-      cover: require("./img/test7.jpg"),
-      url: "",
-      lengthStr: "01:11",
-      category: "Nature",
-      liked: false,
-      recommended: true
-    }
-  ]
-]
-
-function recommendMoreUpdate(userId) {
-  t += 1
-  console.log(t)
-  return t < sim.length ? sim[t] : []
-}
-
-function checkUserId(userId) {
-  return userId === "1000"
-}
-
-function registerNewUserId(interstedCategories) {
-  return "1001"
-}
-/* -------------Above: For demonstration purposes only------------- */
 
 export default App
