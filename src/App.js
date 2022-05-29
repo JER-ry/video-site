@@ -615,7 +615,7 @@ function checkUserId(userId) {
 }
 
 function registerNewUserId(interstedCategories) {
-  return "1000"
+  return "1001"
 }
 /* -------------Above: For demonstration purposes only------------- */
 
