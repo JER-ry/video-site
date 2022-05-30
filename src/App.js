@@ -556,6 +556,9 @@ class Player extends Component {
             allowfullscreen
           ></iframe>
         </div>
+        {
+          // Want to use <video>? For Streamable, you need a pro account. I don't have one.
+        }
         <div className="inline-flex place-content-between items-center font-medium text-base w-[90%] h-[10%] bg-white rounded-md overflow-hidden shadow-md">
           <button
             className="flex w-36 h-full justify-center items-center text-gray-400 duration-200 hover:text-gray-500 hover:bg-gray-200"
