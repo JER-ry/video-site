@@ -77,7 +77,6 @@ class App extends Component {
       .then((res) => res.json())
       .then(
         (result) => {
-          console.log(result)
           const videoList = this.state.videoList.slice().concat(result)
           this.setState({
             videoList
@@ -91,9 +90,9 @@ class App extends Component {
     fetch(
       server +
         "watch/" +
-        String(this.props.userId) +
+        String(this.state.userId) +
         "/" +
-        String(videoToPlay.video_id),
+        String(this.state.videoList[videoToPlay].video_id),
       { method: "PUT" }
     )
       .then((res) => res.json())
@@ -106,10 +105,10 @@ class App extends Component {
   handleLike(videoToPlay) {
     fetch(
       server +
-        "watch/" +
-        String(this.props.userId) +
+        "like/" +
+        String(this.state.userId) +
         "/" +
-        String(videoToPlay.video_id),
+        String(this.state.videoList[videoToPlay].video_id),
       { method: "PUT" }
     )
       .then((res) => res.json())
@@ -127,10 +126,10 @@ class App extends Component {
   handleUnlike(videoToPlay) {
     fetch(
       server +
-        "watch/" +
-        String(this.props.userId) +
+        "unlike/" +
+        String(this.state.userId) +
         "/" +
-        String(videoToPlay.video_id),
+        String(this.state.videoList[videoToPlay].video_id),
       { method: "PUT" }
     )
       .then((res) => res.json())
@@ -224,7 +223,6 @@ class User extends Component {
   }
 
   handleRegisterSubmit(values) {
-    console.log(values)
     fetch(server + "register/", {
       method: "POST",
       body: JSON.stringify(values),
@@ -450,7 +448,7 @@ class VideoList extends Component {
       playing: true,
       videoToPlay: i
     })
-    this.props.handleWatch(this.state.videoToPlay)
+    this.props.handleWatch(this.props.videoList[i])
   }
 
   handleBackClick() {
@@ -463,7 +461,7 @@ class VideoList extends Component {
   render() {
     return this.state.playing ? (
       <Player
-        videoToPlay={this.state.videoList[this.state.videoToPlay]}
+        videoToPlay={this.props.videoList[this.state.videoToPlay]}
         handleBackClick={() => this.handleBackClick()}
         handleLike={() => this.props.handleLike(this.state.videoToPlay)}
         handleUnlike={() => this.props.handleUnlike(this.state.videoToPlay)}
@@ -495,7 +493,9 @@ function VideoPreview(props) {
       <div className="relative w-72 h-[10.125rem]">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "require(" + props.video.cover + ")" }}
+          style={{
+            backgroundImage: "url(" + props.video.cover + ")"
+          }}
         />
         <div className="absolute inset-0 bg-black/0 hover:bg-black/50 text-white/0 hover:text-white z-10 duration-200 flex justify-center items-center font-medium text-lg">
           Play
