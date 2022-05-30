@@ -62,40 +62,26 @@ class App extends Component {
       )
     })
     this.setState({
-      userId: userId,
+      userId,
       tabList
     })
+    this.recommendMore(userId)
   }
 
-  handleRegisterSubmit(values) {
-    fetch(server + "register/", {
-      mode: "POST",
-      body: values
+  recommendMore(userId) {
+    fetch(server + "recommend_more/" + String(userId), {
+      method: "PUT",
+      body: JSON.stringify(this.state.videoList.map((video) => video.video_id)),
+      headers: { "Content-Type": "application/json" }
     })
       .then((res) => res.json())
       .then(
         (result) => {
-          this.updateUserId(result)
-        },
-        (error) => {}
-      )
-  }
-
-  recommendMore() {
-    fetch(server + "recommend_more/" + String(this.state.userId), {
-      method: "GET"
-    })
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          if (result.length === 0) {
-            return false
-          } else {
-            this.setState({
-              videoList: this.state.videoList.slice().concat(result)
-            })
-            return true
-          }
+          console.log(result)
+          const videoList = this.state.videoList.slice().concat(result)
+          this.setState({
+            videoList
+          })
         },
         (error) => {}
       )
@@ -108,7 +94,7 @@ class App extends Component {
         String(this.props.userId) +
         "/" +
         String(videoToPlay.video_id),
-      { mode: "PUT" }
+      { method: "PUT" }
     )
       .then((res) => res.json())
       .then(
@@ -124,7 +110,7 @@ class App extends Component {
         String(this.props.userId) +
         "/" +
         String(videoToPlay.video_id),
-      { mode: "PUT" }
+      { method: "PUT" }
     )
       .then((res) => res.json())
       .then(
@@ -145,7 +131,7 @@ class App extends Component {
         String(this.props.userId) +
         "/" +
         String(videoToPlay.video_id),
-      { mode: "PUT" }
+      { method: "PUT" }
     )
       .then((res) => res.json())
       .then(
@@ -183,16 +169,12 @@ class App extends Component {
             <User
               userId={this.state.userId}
               updateUserId={(userId) => this.updateUserId(userId)}
-              recommendMore={() => this.recommendMore()}
             />
           ) : (
             <VideoList
               userId={this.state.userId}
               videoList={this.state.videoList}
-              handleRegisterSubmit={(values) =>
-                this.handleRegisterSubmit(values)
-              }
-              recommendMore={() => this.recommendMore()}
+              recommendMore={() => this.recommendMore(this.state.userId)}
               handleWatch={(videoToPlay) => this.handleWatch(videoToPlay)}
               handleLike={(videoToPlay) => this.handleLike(videoToPlay)}
               handleUnlike={(videoToPlay) => this.handleUnlike(videoToPlay)}
@@ -229,11 +211,10 @@ class User extends Component {
   }
 
   handleLogin(values) {
+    this.props.updateUserId(values.userId)
     this.setState({
       status: 2
     })
-    this.props.updateUserId(values.userId)
-    this.props.recommendMore()
   }
 
   handleRegister() {
@@ -243,11 +224,22 @@ class User extends Component {
   }
 
   handleRegisterSubmit(values) {
-    this.props.handleRegisterSubmit(values)
+    console.log(values)
+    fetch(server + "register/", {
+      method: "POST",
+      body: JSON.stringify(values),
+      headers: { "Content-Type": "application/json" }
+    })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          this.props.updateUserId(result)
+        },
+        (error) => {}
+      )
     this.setState({
       status: 2
     })
-    this.props.recommendMore()
   }
 
   render() {
@@ -291,7 +283,7 @@ class Login extends Component {
   }
 
   checkUserId(userId) {
-    fetch(server + "check_user_existence/" + String(userId), { method: "GET" })
+    fetch(server + "check_user_existence/" + String(userId))
       .then((res) => res.json())
       .then(
         (result) => {
@@ -445,12 +437,12 @@ class VideoList extends Component {
   }
 
   handleRecClick() {
-    if (this.props.recommendMore()) {
-    } else {
+    var videoListLength = this.props.videoList.length
+    this.props.recommendMore()
+    if (this.props.videoList.length === videoListLength)
       this.setState({
         anythingToRecommend: false
       })
-    }
   }
 
   handleVideoClick(i) {
@@ -503,7 +495,7 @@ function VideoPreview(props) {
       <div className="relative w-72 h-[10.125rem]">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(" + props.video.cover + ")" }}
+          style={{ backgroundImage: "require(" + props.video.cover + ")" }}
         />
         <div className="absolute inset-0 bg-black/0 hover:bg-black/50 text-white/0 hover:text-white z-10 duration-200 flex justify-center items-center font-medium text-lg">
           Play
