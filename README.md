@@ -8,11 +8,15 @@ Except all data are fake, the website looks quite real since all functions seem 
 
 Since I created this with `create-react-app`, you know what to do:
 
+> Make sure you’ve had Node.js installed (go to https://nodejs.org/ and download the LTS version). Open a terminal (see `README.md` of my `video-api` repo) and enter:
+
 ```powershell
 npm start
 ```
 
 You also know how to deploy this to Netlify or so right?
+
+> It’s OK if you don’t. Since there are still some CORS problems, currently it’s recommended to run the site locally.
 
 ## Things to do
 
